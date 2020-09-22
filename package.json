@@ -1,6 +1,6 @@
 {
-  "name": "react-trix",
-  "version": "0.6.0",
+  "name": "@homebound/react-trix",
+  "version": "0.6.1",
   "description": "React wrapper around Basecamp's Trix editor.",
   "main": "main.js",
   "scripts": {
@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/dstpierre/react-trix"
+    "url": "https://github.com/homebound-team/react-trix"
   },
   "keywords": [
     "react",
@@ -31,9 +31,9 @@
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/dstpierre/react-trix/issues"
+    "url": "https://github.com/homebound-team/react-trix/issues"
   },
-  "homepage": "https://github.com/dstpierre/react-trix",
+  "homepage": "https://github.com/homebound-team/react-trix",
   "dependencies": {
     "trix": "^1.2.2"
   },
