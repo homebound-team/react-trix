@@ -25,7 +25,6 @@ export interface TrixEditorProps {
 export interface TrixEditorState {
     showMergeTags: boolean;
     tags: Array<MergeTag>;
-    selectedTagCount: number;
 }
 export interface Editor {
     getSelectedRange: () => Array<number>;
