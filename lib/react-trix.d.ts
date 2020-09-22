@@ -25,6 +25,7 @@ export interface TrixEditorProps {
 export interface TrixEditorState {
     showMergeTags: boolean;
     tags: Array<MergeTag>;
+    selectedTagCount: number;
 }
 export interface Editor {
     getSelectedRange: () => Array<number>;
@@ -50,6 +51,10 @@ export declare class TrixEditor extends React.Component<TrixEditorProps, TrixEdi
     private generateId;
     componentDidMount(): void;
     componentWillUnmount(): void;
+    private frequencyOfChar;
+    private frequencyOfWord;
+    private countTriggersInText;
+    private countTagsInText;
     private handleChange;
     private handleUpload;
     private uploadAttachment;

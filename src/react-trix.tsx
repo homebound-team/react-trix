@@ -1,5 +1,5 @@
 import * as React from "react";
-import { BoxSizingProperty } from "csstype";
+import {BoxSizingProperty} from "csstype";
 
 export interface MergeTag {
   tag: string;
@@ -31,6 +31,7 @@ export interface TrixEditorProps {
 export interface TrixEditorState {
   showMergeTags: boolean;
   tags: Array<MergeTag>;
+  selectedTagCount: number;
 }
 
 export interface Editor {
@@ -62,15 +63,16 @@ export class TrixEditor extends React.Component<TrixEditorProps, TrixEditorState
 
     this.state = {
       showMergeTags: false,
-      tags: []
+      tags: [],
+      selectedTagCount: 0
     }
   }
   private generateId(): string {
     let dt = new Date().getTime();
     let uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        let r = (dt + Math.random()*16)%16 | 0;
-        dt = Math.floor(dt/16);
-        return (c=='x' ? r :(r&0x3|0x8)).toString(16);
+      let r = (dt + Math.random()*16)%16 | 0;
+      dt = Math.floor(dt/16);
+      return (c=='x' ? r :(r&0x3|0x8)).toString(16);
     });
     return "T" + uuid;
   }
@@ -108,6 +110,28 @@ export class TrixEditor extends React.Component<TrixEditorProps, TrixEditorState
       this.container.removeEventListener("trix-attachment-add", this.handleUpload);
     }
   }
+  private frequencyOfChar(word: string, char: string): number {
+    let count = 0;
+    for (const c of word) {
+      if (c === char) ++count;
+    }
+    return count;
+  }
+
+  private frequencyOfWord(text: string, word: string): number {
+    return (text.match(new RegExp(word, "g")) || []).length
+  }
+  /** this assumes that trigger is a single character */
+  private countTriggersInText(text: string): number {
+    const triggers = [...new Set(this.props.mergeTags.map(mt => mt.trigger))];
+    return triggers.reduce((count, t) => count + this.frequencyOfChar(text, t), 0);
+  }
+  private countTagsInText(text: string): number {
+    console.log(text);
+    const countTagsOfMergeTag = (tags: MergeTag[]): number =>
+        tags.reduce((count, { tag }) => count + this.frequencyOfWord(text, tag), 0);
+    return this.props.mergeTags.reduce((count, { tags}) => count + countTagsOfMergeTag(tags), 0);
+  }
   private handleChange(e) {
     const props = this.props;
     let state: TrixEditorState = this.state;
@@ -118,7 +142,6 @@ export class TrixEditor extends React.Component<TrixEditorProps, TrixEditorState
     }
 
     const range = this.editor.getSelectedRange();
-
     // if we have a collapse selection
     if (text && range[0] == range[1]) {
       // if we have a merge tag mergeTagTrigger
@@ -129,6 +152,7 @@ export class TrixEditor extends React.Component<TrixEditorProps, TrixEditorState
           const trigger = text[lastChar];
           for (let i = 0; i < props.mergeTags.length; i++) {
             if (trigger == props.mergeTags[i].trigger) {
+              console.log("showMergeTags = true");
               state.showMergeTags = true;
               state.tags = props.mergeTags[i].tags;
               this.setState(state);
@@ -136,6 +160,17 @@ export class TrixEditor extends React.Component<TrixEditorProps, TrixEditorState
             }
           }
         }
+      }
+    }
+    console.log("tag count: ", this.countTagsInText(text));
+    if (state.showMergeTags) {
+      // if the amount of triggers is equal to the amount of tags,
+      // assume there are not any mentions being currently typed and close the dropdown
+      if (this.countTriggersInText(text) === this.countTagsInText(text)) {
+        console.log("resetting");
+        state.showMergeTags = false;
+        state.tags = [];
+        this.setState(state);
       }
     }
   }
@@ -155,7 +190,7 @@ export class TrixEditor extends React.Component<TrixEditorProps, TrixEditorState
         form.append(k, this.props.uploadData[k]);
       }
     }
-    
+
     //form.append("Content-Type", "multipart/form-data");
     form.append((this.props.fileParamName || "file"), file);
     xhr = new XMLHttpRequest();
@@ -195,6 +230,9 @@ export class TrixEditor extends React.Component<TrixEditorProps, TrixEditorState
 
     // current cursor position
     const rect = this.editor.getClientRectAtPosition(this.editor.getSelectedRange()[0]);
+    if (!rect) {
+      return null;
+    }
     const boxStyle = {
       "position": "absolute" as "absolute",
       "top": rect.top + 25 - editorPosition.top,
@@ -208,7 +246,7 @@ export class TrixEditor extends React.Component<TrixEditorProps, TrixEditorState
       "background": "linear-gradient(to bottom right, white, hsla(0,0%,100%,.8))",
       "border": "1px solid rgba(0,0,0,.3)",
       "boxShadow": ".05em .2em .6em rgba(0,0,0,.2)",
-	    "textShadow": "none"
+      "textShadow": "none"
     };
     const tagStyle = {
       "display": "block",
@@ -216,11 +254,11 @@ export class TrixEditor extends React.Component<TrixEditorProps, TrixEditorState
       "cursor": "pointer"
     }
     return (
-      <div style={boxStyle} className="react-trix-suggestions">
-        {tags.map((t) => {
-          return <a key={t.name} style={tagStyle} href="#" onClick={this.handleTagSelected.bind(this, t)}>{t.name}</a>
-        })}
-      </div>
+        <div style={boxStyle} className="react-trix-suggestions">
+          {tags.map((t) => {
+            return <a key={t.name} style={tagStyle} href="#" onClick={this.handleTagSelected.bind(this, t)}>{t.name}</a>
+          })}
+        </div>
     );
   }
   render() {
@@ -245,7 +283,7 @@ export class TrixEditor extends React.Component<TrixEditorProps, TrixEditorState
     }
 
     if (props.toolbar) {
-        attributes["toolbar"] = props.toolbar;
+      attributes["toolbar"] = props.toolbar;
     }
 
     let mergetags: React.ReactNode = null;
@@ -253,15 +291,15 @@ export class TrixEditor extends React.Component<TrixEditorProps, TrixEditorState
       mergetags = this.renderTagSelector(state.tags);
     }
     return (
-      <div id="trix-editor-top-level" ref={(d) => this.d = d} style={{ "position": "relative" }}>
-        {React.createElement("trix-editor", attributes)}
-        <input
-          type="hidden"
-          id={`input-${this.id}`}
-          value={this.props.value}
-        />
-        {mergetags}
-      </div>
+        <div id="trix-editor-top-level" ref={(d) => this.d = d} style={{ "position": "relative" }}>
+          {React.createElement("trix-editor", attributes)}
+          <input
+              type="hidden"
+              id={`input-${this.id}`}
+              value={this.props.value}
+          />
+          {mergetags}
+        </div>
     );
   }
 }

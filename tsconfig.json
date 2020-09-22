@@ -1,11 +1,13 @@
 {
 	"compilerOptions": {
 		"outDir": "./lib",
+		"lib": ["ESNext", "DOM"],
 		"target": "es5",
 		"module": "commonjs",
 		"noImplicitAny": false,
 		"removeComments": true,
-    "declaration": true,
+		"downlevelIteration": true,
+		"declaration": true,
 		"sourceMap": true,
 		"jsx": "react"
 	},
