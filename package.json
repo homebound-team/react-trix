@@ -1,6 +1,6 @@
 {
   "name": "@homebound/react-trix",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "React wrapper around Basecamp's Trix editor.",
   "main": "main.js",
   "scripts": {
