@@ -266,6 +266,7 @@ export class TrixEditor extends React.Component<
     }
     const boxStyle = {
       position: "absolute" as "absolute",
+      zIndex: 1001,
       top: rect.top + 25 - editorPosition.top,
       left: rect.left + 25 - editorPosition.left,
       width: "250px",
