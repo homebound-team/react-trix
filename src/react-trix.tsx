@@ -159,6 +159,7 @@ export class TrixEditor extends React.Component<
       0
     );
   }
+
   private handleChange(e) {
     const props = this.props;
     let state: TrixEditorState = this.state;
@@ -188,16 +189,36 @@ export class TrixEditor extends React.Component<
         }
       }
     }
-    if (state.showMergeTags) {
-      // if the amount of triggers is equal to the amount of tags,
-      // assume there are not any mentions being currently typed and close the dropdown
-      if (this.countTriggersInText(text) === this.countTagsInText(text)) {
-        state.showMergeTags = false;
-        state.tags = [];
+
+    const filterMentions = (text: string) => {
+      const [{ tags, trigger }] = props.mergeTags;
+      // This is assuming that trigger is always "@", for HB internal
+      const mentionHint = text
+        .slice(text.lastIndexOf("@"))
+        .replace(/\xA0/, " "); // replace &nbsp with space
+      if (mentionHint) {
+        const filteredTags = tags.filter(({ tag }) =>
+          tag.startsWith(mentionHint)
+        );
+        state.tags = filteredTags;
         this.setState(state);
       }
+    };
+
+    // if the amount of triggers is equal to the amount of tags,
+    // assume there are not any mentions being currently typed and close the dropdown
+    if (this.countTriggersInText(text) === this.countTagsInText(text)) {
+      state.showMergeTags = false;
+      state.tags = [];
+      this.setState(state);
+    } else {
+      state.showMergeTags = true;
+      state.tags = props.mergeTags[0].tags;
+      this.setState(state);
+      filterMentions(text);
     }
   }
+
   private handleUpload(e: any) {
     var attachment = e.attachment;
     if (attachment.file) {
