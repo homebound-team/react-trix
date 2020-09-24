@@ -1,7 +1,7 @@
 {
 	"compilerOptions": {
 		"outDir": "./lib",
-		"lib": ["ESNext", "DOM", "DOM.Iterable"],
+		"lib": ["ESNext", "DOM"],
 		"target": "es5",
 		"module": "commonjs",
 		"noImplicitAny": false,
