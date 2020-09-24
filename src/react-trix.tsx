@@ -195,7 +195,7 @@ export class TrixEditor extends React.Component<
       // This is assuming that trigger is always "@", for HB internal
       const mentionHint = text
         .slice(text.lastIndexOf("@"))
-        .replace(/\xA0/, " "); // replace &nbsp with space
+        .replace(/\xA0/g, " "); // replace &nbsp with space
       if (mentionHint) {
         const filteredTags = tags.filter(({ tag }) =>
           tag.startsWith(mentionHint)
